@@ -20,6 +20,9 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,6 +46,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.common.logger.Log;
+
+import static android.R.attr.duration;
+import static android.R.attr.text;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -92,12 +98,18 @@ public class BluetoothChatFragment extends Fragment {
         setHasOptionsMenu(true);
 
         // TODO: Get local Bluetooth adapter
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        /**
-         *  TODO: If the adapter is null, then Bluetooth is not supported.
-         *  TODO: Let us know via Toast Bluetooth is not available.
-         *  TODO: Then finish() the fragment's attached Activity.
-         */
+        // TODO: If the adapter is null, then Bluetooth is not supported.
+        if (mBluetoothAdapter == null) {
+            // TODO: Let us know via Toast Bluetooth is not available.
+            Toast toast = Toast.makeText(getActivity(), "Bluetooth not available", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        // TODO: Then finish() the fragment's attached Activity.
+        getActivity().finish();
+
     }
 
 
@@ -114,6 +126,9 @@ public class BluetoothChatFragment extends Fragment {
                  * TODO: If adapter is NOT enabled, send an Implicit Intent with the action ACTION_REQUEST_ENABLE (send for a result)
                  * TODO: Otherwise, check if the BluetoothChatService is null, and if so call setupChat() to set it up.
                  */
+
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
             }
             else if(mChatService == null){
@@ -204,6 +219,11 @@ public class BluetoothChatFragment extends Fragment {
          * TODO: If not, send an Implicit Intent for the ACTION_REQUEST_DISCOVERABLE action (with an extra for the EXTRA_DISCOVERABLE_DURATION)
          */
 
+        if(mBluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+        }
     }
 
     /**
@@ -376,7 +396,9 @@ public class BluetoothChatFragment extends Fragment {
          * TODO: Then use the adapter's .getRemoteDevice() to get a reference to the device
          * TODO: Then tell the mChatService to connect to that device!
          */
-
+        Bundle b = data.getBundleExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS).;
+        mBluetoothAdapter.getRemoteDevice(b.getByteArray(address));
+        mChatService.connect();
     }
 
     @Override
